@@ -1,0 +1,6 @@
+set -eux
+TARGET=`pwd`
+export AUTHOR=`basename $TARGET`
+pushd ../
+sh push.sh
+popd
