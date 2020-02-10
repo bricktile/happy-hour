@@ -1,0 +1,6 @@
+set -eu
+export TARGET=`pwd`
+export AUTHOR=`basename $TARGET`
+pushd ../
+sh newdaily.sh
+popd

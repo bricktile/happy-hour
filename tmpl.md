@@ -1,5 +1,5 @@
-- date: 20200209
-- author: ShiKaiWi
+- date: {DATE} 
+- author: {AUTHOR}
 
 ## Plan
 
