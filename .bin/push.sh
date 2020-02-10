@@ -1,4 +1,4 @@
-set -ue
+set -xue
 # TODO: check must be on master branch
 git add .
 git checkout -b tmp_$AUTHOR
