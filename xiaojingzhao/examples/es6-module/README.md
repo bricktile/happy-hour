@@ -2,5 +2,5 @@
 
 ```
 $ npm install esm
-$ node -r esm index.js
+$ node -r esm path/xxx/.js
 ```
