@@ -1,8 +1,8 @@
 - date: {DATE} 
 - author: {AUTHOR}
 
-## Plan
+## Target 
 
 ## Notes
 
-## More
+## Questions

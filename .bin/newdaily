@@ -1,6 +1,16 @@
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 set -xue
 export TARGET=`pwd`
 export AUTHOR=`basename $TARGET`
+
+if test ! -n  "${1-}"; then
+    printf "expect title, usage: ${RED}newdaily title${NC}\n"
+    exit
+fi
+
+export TITLE=$1
 pushd ../
 sh ./.bin/newdaily.sh
 popd
