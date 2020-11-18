@@ -7,14 +7,17 @@
 
 ## Notes
 ### What is BigTable?
+
 - Bigtableis a distributed storage system for managing structured data that is designed to scale to a very large size: petabytes of data across thousands of commodity servers.
 - Data model: [row key: string, column: string, time: i64] => string
 
 ### How the bigtable is implemented?
 
-### How the bigtable is implemented?
 - Data model: [row key: string, column: string, time: i64] => string
+
 Architecture:
+
+```bash
          +-------------------------+                                     
          |  meta cluster (Chubby)  |                                     
          +-------------------------+                                     
@@ -34,5 +37,6 @@ Architecture:
 |                    GFS                    |                            
 |                                           |                            
 +-------------------------------------------+                            
+```
 
 ## Questions
