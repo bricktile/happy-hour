@@ -16,6 +16,11 @@
 8. run the tikv server;
 9. run status server;
 
+### tikv raw_put procedure
+1. build raft command and send it by the router;
+2. the router is built by [create_raft_batch_system](components/raftstore/src/store/fsm/store.rs:1376) and the router is also paired by a batch system;
+3. the batch system is used to spawn raft worker(src/server/node.rs:394) and the node is started also;
+
 ### best practice
 #### yatp
 yet another thread pool by pingcap.
