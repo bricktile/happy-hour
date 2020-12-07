@@ -1,5 +1,5 @@
-# onehoureveryday
-Learning one hour every day.
+# Happy Hour
+Learn anything at anytime in one hour.
 
 # Contribution
 ## init your directory
