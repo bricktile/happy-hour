@@ -21,6 +21,26 @@
 2. the router is built by [create_raft_batch_system](components/raftstore/src/store/fsm/store.rs:1376) and the router is also paired by a batch system;
 3. the batch system is used to spawn raft worker(src/server/node.rs:394) and the node is started also;
 
+### BatchSystem
+1. This is an actor model;
+2. An FSM is a actor;
+
+#### fundamental concepts of actor model
+>The actor model adopts the philosophy that everything is an actor. This is similar to the everything is an object philosophy used by some object-oriented programming languages.
+>
+>An actor is a computational entity that, in response to a message it receives, can concurrently:
+>
+>send a finite number of messages to other actors;
+>create a finite number of new actors;
+>designate the behavior to be used for the next message it receives.
+>There is no assumed sequence to the above actions and they could be carried out in parallel.
+>
+>Decoupling the sender from communications sent was a fundamental advance of the actor model enabling asynchronous communication and control structures as patterns of passing messages.[8]
+>
+>Recipients of messages are identified by address, sometimes called "mailing address". Thus an actor can only communicate with actors whose addresses it has. It can obtain those from a message it receives, or if the address is for an actor it has itself created.
+>
+>The actor model is characterized by inherent concurrency of computation within and among actors, dynamic creation of actors, inclusion of actor addresses in messages, and interaction only through direct asynchronous message passing with no restriction on message arrival order.
+
 ### best practice
 #### yatp
 yet another thread pool by pingcap.
