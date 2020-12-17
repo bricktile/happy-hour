@@ -41,6 +41,44 @@
 >
 >The actor model is characterized by inherent concurrency of computation within and among actors, dynamic creation of actors, inclusion of actor addresses in messages, and interaction only through direct asynchronous message passing with no restriction on message arrival order.
 
+The work procedure of the Batch System:
+```
+                         +---------------------------+                     +---------------+          +--------------------+
+                         | Router                    |                     | Batch System  |          | Polling            |
++--------+               | +----------------------+  |                     |               |          |                    |
+|ctrl_msg|---------------+>|   control mailbox    |  |                     |  +---------+  |          | +----------------+ |
++--------+               | +----------------------+  |                     |  |poller_0 |  |          | |collect a batch | |
++--------+               | +----------------------+  | send msg to fsm     |  +---------+  keep polling |    of fsms     | |
+|data_msg|---------------+>|   normal mailbox_0   |--+--------------------->  |poller_1 |--+----------> +----------------+ |
++--------+               | +----------------------+  | notify the poller   |  +---------+  |          | |handle the batch| |
++--------+               | +----------------------+  |                     |  |poller_2 |  |          | |    of fsms     | |
+|data_msg|---------------+>|   normal mailbox_1   |  |                     |  +---------+  |          | +----------------+ |
++--------+               | +----------------------+  |                     |  |poller_3 |  |          | |release the fsms| |
+                         |                           |                     |  +---------+  |          | |to their mailbox| |
+                         |                           |                     |               |          | +----------------+ |
+                         +---------------------------+                     +---------------+          +--------------------+
+                                                                                                                            
+                                                                                                                            
+                                                                                                                            
+                          +------------------------------------+           +--------------------+                           
+                          |    Mailbox                         |           | Send               |                           
+                          |  +------------------------------+  |           |+------------------+|                           
+                          |  |   sender: send smg to fsm    |  |           ||send msg to fsm   ||                           
+                          |  +------------------------------+  |---------->|+------------------+|                           
+                          |  +------------------------------+  |           || change fsm_state ||                           
+                          |  | fsm_state: fsm and its state |  |           || to notified(fsm  ||                           
+                          |  +------------------------------+  |           ||will be taken away||                           
+                          +------------------------------------+           ||from the mailbox) ||                           
+                                                                           ||                  ||                           
+                                                                           |+------------------+|                           
+                                                                           || send the fsm to  ||                           
+                                                                           ||  and notify the  ||                           
+                                                                           ||    poller by     ||                           
+                                                                           ||    scheduler     ||                           
+                                                                           |+------------------+|                           
+                                                                           +--------------------+                           
+```
+
 ### best practice
 #### yatp
 yet another thread pool by pingcap.
