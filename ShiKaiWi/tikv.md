@@ -17,9 +17,12 @@
 9. run status server;
 
 ### tikv raw_put procedure
-1. build raft command and send it by the router;
+1. build raft command and send it by the router(src/server/service/kv.rs);
 2. the router is built by [create_raft_batch_system](components/raftstore/src/store/fsm/store.rs:1376) and the router is also paired by a batch system;
 3. the batch system is used to spawn raft worker(src/server/node.rs:394) and the node is started also;
+4. Based on knowledge of BatchSystem we should say `PeerFsm`(components/raftstore/src/store/fsm/peer.rs) is the key to do raw_put by raft protocol;
+5. A batch of put requests is submitted to `PeerFsm` and the `PeerFsm` is handled by `RaftPoller`(components/raftstore/src/store/fsm/store.rs:620);
+6. `RaftPoller` proposes the batch of put requests in its Raft nodes.
 
 ### BatchSystem
 1. This is an actor model;
@@ -83,5 +86,12 @@ The work procedure of the Batch System:
 #### yatp
 yet another thread pool by pingcap.
 
+#### config manager
+How to use config manager?
+
+#### failpoint
+what? why? how?
+
 ## Questions
 1. there is a diagnosis service and how to design such a service?
+
