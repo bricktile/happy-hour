@@ -44,6 +44,7 @@
 >
 >The actor model is characterized by inherent concurrency of computation within and among actors, dynamic creation of actors, inclusion of actor addresses in messages, and interaction only through direct asynchronous message passing with no restriction on message arrival order.
 
+#### Work Procedure
 The work procedure of the Batch System:
 ```
                          +---------------------------+                     +---------------+          +--------------------+
@@ -81,6 +82,15 @@ The work procedure of the Batch System:
                                                                            |+------------------+|                           
                                                                            +--------------------+                           
 ```
+
+#### design targets of batch system
+- avoid waiting for batch
+- avoid busy polling
+
+#### questions of batch system
+##### Why and when to do reschedule?
+##### Why only to reschedule only half of the whole fsms?
+##### When and why to do release?
 
 ### best practice
 #### yatp
