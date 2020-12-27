@@ -89,7 +89,44 @@ The work procedure of the Batch System:
 
 #### questions of batch system
 ##### Why and when to do reschedule?
-##### Why only to reschedule only half of the whole fsms?
+Code reads:
+```rust
+let mut hot_fsm_count = 0;
+for (i, p) in batch.normals.iter_mut().enumerate() {
+    let len = self.handler.handle_normal(p);
+    if p.is_stopped() {
+        reschedule_fsms.push((i, ReschedulePolicy::Remove));
+    } else {
+        if batch.timers[i].elapsed() >= self.reschedule_duration {
+            hot_fsm_count += 1;
+            // We should only reschedule a half of the hot regions, otherwise,
+            // it's possible all the hot regions are fetched in a batch the
+            // next time.
+            if hot_fsm_count % 2 == 0 {
+                reschedule_fsms.push((i, ReschedulePolicy::Schedule));
+                continue;
+            }
+        }
+        if let Some(l) = len {
+            reschedule_fsms.push((i, ReschedulePolicy::Release(l)));
+        }
+    }
+}
+```
+When: the fsm stays in batch for too long execeeding the reschedul_duration.
+
+Why: Reschduling the hot fsms to avoid starvation of some fsms which will comes before the recheduled hot ones.
+
+##### Why only to reschedule only half of the whothe fsm stays in batch for too long execeeding the reschedul_duration.
+The comments say:
+```rust
+// We should only reschedule a half of the hot regions, otherwise,
+// it's possible all the hot regions are fetched in a batch the
+// next time.
+```
+
+But I don't understand why all the hot regions will be fetched in a batch the next time and why it's bad even if that.
+
 ##### When and why to do release?
 
 ### best practice
