@@ -6,6 +6,7 @@
 - Understand the startup procedure;
 - Understand the query procedure;
 - Find out some key designs.
+- Understand all components.
 
 ## Notes
 ### Write Procedure
@@ -26,6 +27,10 @@
 - Error handling: Snafu
 - Tracing: tracing
 - Arrow + Datafusion to handle the sql
+
+### Components
+#### segment_store
+hierachy: SegmenetStore -> Database -> Partition -> Table -> Segment -> Column.
 
 ## Questions
 ### 1. Why are data written to write buffer before to wal?
