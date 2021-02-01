@@ -9,10 +9,31 @@
 - Understand all components.
 
 ## Notes
+### Debug Procedure
+```bash
+curl --location --request PUT 'http://localhost:8080/iox/api/v1/databases/company_sensors' \
+--header 'Content-Type: application/json' \
+-d '{
+    "name": "company_sensors"
+}'
+```
+
+```bash
+curl -v "http://127.0.0.1:8080/api/v2/write?org=company&bucket=sensors" --data-binary @tests/fixtures/lineproto/metrics.lp
+curl -v -G -d 'org=company' -d 'bucket=sensors' --data-urlencode 'sql_query=select * from processes' "http://127.0.0.1:8080/api/v2/read"
+```
+
 ### Write Procedure
-1. Encode the input lines to raw data (partitioned by hour);
-2. Write the structured lines to write buffer;
-3. Persist the raw data to WAL.
+- Http handler parses the input to lines and then call server.write_lines(lines).
+- Find the written database.
+- Partition the lines according to the rules of the database.
+- Write to mutable_buffer if exists.
+ - Find the table in the open chunk of the partition of the database.
+ - Write lines to columns whose type is `Vec<Column>` and they are arranged like a column store in memory.
+- Write to wal_buffer if exists.
+ - Persist the old segment to object store if the written lines cause the current segment to be full and closed.
+- Replicate the lines if necessary.
+- Broadcast the lines to subscribers if exists.
 
 ### Startup Procedure
 1. Restore all data in wal to write buffer.
@@ -31,6 +52,7 @@
 ### Components
 #### segment_store
 hierachy: SegmenetStore -> Database -> Partition -> Table -> Segment -> Column.
+
 
 ## Questions
 ### 1. Why are data written to write buffer before to wal?
