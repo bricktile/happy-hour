@@ -44,27 +44,17 @@ curl -v -G -d 'org=company' -d 'bucket=sensors' --data-urlencode 'sql_query=sele
   - Generate the physical plan by the execution context.
 - Collect the results of exceution of the physical plan.
 
-### Startup Procedure
-1. Restore all data in wal to write buffer.
+### Component: Read Buffer
+#### Usage
+An in-memory collection of immutable chunks provides optimized reading functionality. And the immutable chunks comes from mutable buffer or Parquet files or WAL Segments.
 
-### Query Procedure
-1. Parse sql to obtain the relavent tables (no filter for tags & time range);
-2. Fetch all the columns from queried tables;
-3. Use datafusion to execute the sql on the fetched data.
+#### hierachy
+Database -> Partition -> Chunk -> Table -> RowGroup -> Column
 
+#### When load data to Read Buffer
 
 ### Key designs
 - Error handling: Snafu
 - Tracing: tracing
 - Arrow + Datafusion to handle the sql
 
-### Components
-#### segment_store
-hierachy: SegmenetStore -> Database -> Partition -> Table -> Segment -> Column.
-
-
-## Questions
-### 1. Why are data written to write buffer before to wal?
-### 2. When to flush data in write buffer?
-### 3. Why to fetch all data in the write buffer?
-### 4. Why not to use Arrow for storing column data so that to avoid rebuilding it every time sql query comes?
