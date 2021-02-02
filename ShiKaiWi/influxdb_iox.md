@@ -28,12 +28,21 @@ curl -v -G -d 'org=company' -d 'bucket=sensors' --data-urlencode 'sql_query=sele
 - Find the written database.
 - Partition the lines according to the rules of the database.
 - Write to mutable_buffer if exists.
- - Find the table in the open chunk of the partition of the database.
- - Write lines to columns whose type is `Vec<Column>` and they are arranged like a column store in memory.
+  - Find the table in the open chunk of the partition of the database.
+  - Write lines to columns whose type is `Vec<Column>` and they are arranged like a column store in memory.
 - Write to wal_buffer if exists.
- - Persist the old segment to object store if the written lines cause the current segment to be full and closed.
+  - Persist the old segment to object store if the written lines cause the current segment to be full and closed.
 - Replicate the lines if necessary.
 - Broadcast the lines to subscribers if exists.
+
+### SQL Query Procedure
+- Create SQL planner.
+- Use the planner and the database to create physical plan.
+  - Parse table names from the sql.
+  - Collect all the chunks from the databases belonging to the tables.
+  - Create the datafusion Execution Context and register the chunks into it.
+  - Generate the physical plan by the execution context.
+- Collect the results of exceution of the physical plan.
 
 ### Startup Procedure
 1. Restore all data in wal to write buffer.
