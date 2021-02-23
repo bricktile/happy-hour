@@ -67,7 +67,7 @@ The work procedure of the Batch System:
                           +------------------------------------+           +--------------------+                           
                           |    Mailbox                         |           | Send               |                           
                           |  +------------------------------+  |           |+------------------+|                           
-                          |  |   sender: send smg to fsm    |  |           ||send msg to fsm   ||                           
+                          |  |   sender: send msg to fsm    |  |           ||send msg to fsm   ||                           
                           |  +------------------------------+  |---------->|+------------------+|                           
                           |  +------------------------------+  |           || change fsm_state ||                           
                           |  | fsm_state: fsm and its state |  |           || to notified(fsm  ||                           

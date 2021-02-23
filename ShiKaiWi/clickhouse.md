@@ -61,7 +61,7 @@ fr v $var_name
 至于是如何这种查询场景性能优化的，ClickHouse 有两个比较重要的优化：vectorized query execution and runtime code generation，有[相应的论文](./Resources/p5-sompolski.pdf) 可以阅读。
 
 ### Basic Procedure
-主要进行了主流程的理解，目前知道初始化工作是在 dbms/programs/server/Server.cpp 的 main 方法中启动的，其中所有的 databases 放在了 `global_contex` 中，目前了解到的层级是：`Server->global_context->Databases(IDataBase)->Tables(IStorage)`。
+主要进行了主流程的理解，目前知道初始化工作是在 dbms/programs/server/Server.cpp 的 main 方法中启动的，其中所有的 databases 放在了 `global_context` 中，目前了解到的层级是：`Server->global_context->Databases(IDataBase)->Tables(IStorage)`。
 
 其中 IDatabase 是是管理 table 的，而 table 是本质上是一个 IStorage，IStorage 管理具体的数据存储，因此明天的主体流程可以把经历集中在 IStorage 上面。
 
@@ -171,5 +171,6 @@ try {
 
 }
 ```
+
 #### 继承模版类
 一个模版类如果实例化之后，那么就是一个实例类，那么也就可以用来继承。
