@@ -52,6 +52,41 @@ Not just a cache, recent projects have build distributed main-meory key-value st
 Examples: RAM-Cloud and FaRM.
 
 ## Issues and Architectural Choices
+### Data Orgnization and Layout
+- Avoid Page Indirection
+    - Avoid indirection calculation.
+    - Avoid page lathing.
+- Partitioning
+    - Run transactions serially within a partition.
+    - Need to coordinate transactions that span multiple partitions.
+- Multi-versioning
+    - Enable concurrency control schemes where readers never block writers.
+    - Allow for snapshot reads.
+- Row/Columnar layout
+    - Row layout is more appropriate for OLTP workloads.
+    - Columnar layout is more appropriate for analytics workloads.
 
+### Indexing
+- No page-based indirection
+- Cache awareness: CSB+-Tree, Pb+-Tree.
+- Multi-core parallelism
+    - Partitioned: single thread per partition.
+    - Shared: latch-free, Bw-tree, Mass-Tree.
+
+### Concurrency Control
+- Multi-versioning and Optimisim
+- Partitioning
+- Apriori knowledge of wrte/read sets
+
+### Durability and Recovery
+- Optimized for **high throughput** and **low latency**.
+- Perform redo-only logging and Avoid logging index data to minimize log traffic.
+- Copy-on-write for checkpointing because the checkpoint is larger in mmdb than in disk-based database.
+- Parallelize recovery as much as possible to reduce recovery time.
+
+### Query Processing and Compilation
+- The vast difference is in the lower layer of query processing stack.
+    - MMDB reduces runtime overhead by compiling queries directly to machine code.
+    - Disk-based databases use iterator model(Volcano-style processing).
 
 ## Questions
