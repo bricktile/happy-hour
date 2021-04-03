@@ -128,6 +128,43 @@ breakpoint set --file programs/server/TCPHandler.cpp --line 478
 breakpoint set --file src/Storages/MergeTree/MergeTreeDataPartWriterWide.cpp --line 90
 ```
 
+### Processors
+structs:
+- PipelineExecutor
+    - ExecutingGraph
+        - Edge
+        - Node
+    - ThreadsQueue
+        - Manage the threads by thread id.
+        - Use two arrays instead of ordered map(more efficient).
+    - TaskQueue
+        - Record which thread a task belongs to in a two-dimensions vector.
+    - ExecuteContexts: [thread_id] -> ExecuteContext
+        - ExecuteContext
+            - Node: current processor to run.
+            - task_list: expanded pipeline tasks
+            - async_tasks 
+            - node: current processing Node(one ExecuteContext is for one thread and it may be used to process multiple nodes).
+
+procedures:
+- Initialize
+    - Create ExecutingGraph
+- Execute
+    - Initialize Execution
+        - Init TaskQueue.
+        - Init ThreadsQueue.
+        - Init ExecuteCongtext.
+        - addChildlessProcessToStack(Stack is a stack for processor id).
+        - prepareProcessor for every processor in the Stack(Childless processor).
+            - Call prepare on Childless processor.
+            - Set node ExecStatus.
+            - Try to find updated edges belonging to the node and call prepare on the node that the edge points to.
+            - Do expand pipeline if necessary(ExecStatus==ExpandPipeline).
+                - Create ExpandPipelineTask and execute it concurrently(?).
+                - Do prepareProcessor for the current node and some other nodes(?) again.
+
+                
+
 ## Questions
 - global_context 中设定了一个指针用于指向自己，有什么用处？
 - 动态绑定的逻辑确实是符合逻辑的，但是在这种模式下，是不是 OOP 使用起来会有比较多的误区？(可以参考 Server 和 Application 的关系)。
