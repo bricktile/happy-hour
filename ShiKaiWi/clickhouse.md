@@ -221,3 +221,13 @@ const auto scope_exit##n = ext::make_scope_guard([&] { __VA_ARGS__; })
 #define SCOPE_EXIT_FWD(n, ...) SCOPE_EXIT_CONCAT(n, __VA_ARGS__)
 #define SCOPE_EXIT(...) SCOPE_EXIT_FWD(__LINE__, __VA_ARGS__)
 ```
+
+Notes:
+- `\` is a marker for multiple lines in macro.
+- `scope_exit##n` means concat `n` as the suffix to `scope_exit`.
+- `__LINE__` is the line number where the macro code in the source code file.
+- `__VA_ARGS__` are all the parameters of the macro.
+
+
+#### googletest
+Reference: https://google.github.io/googletest/primer.html
