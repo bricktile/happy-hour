@@ -157,13 +157,15 @@ procedures:
         - addChildlessProcessToStack(Stack is a stack for processor id).
         - prepareProcessor for every processor in the Stack(Childless processor).
             - Call prepare on Childless processor.
-            - Set node ExecStatus.
+            - Set node ExecStatus and push the node to task queue or async task queue.
             - Try to find updated edges belonging to the node and call prepare on the node that the edge points to.
             - Do expand pipeline if necessary(ExecStatus==ExpandPipeline).
                 - Create ExpandPipelineTask and execute it concurrently(?).
                 - Do prepareProcessor for the current node and some other nodes(?) again.
-
-                
+    - (Execute concurrently or single thread) executeStepImpl
+        - Find any task from local thread task queue or other thread task queue.
+        - Execute the task(node) by calling `processor.work()` and prepare it(why prepare?).
+        - Keeping finding and executiong until all the tasks are finished or executiong is yeilt.
 
 ## Questions
 - global_context 中设定了一个指针用于指向自己，有什么用处？
@@ -211,3 +213,11 @@ try {
 
 #### 继承模版类
 一个模版类如果实例化之后，那么就是一个实例类，那么也就可以用来继承。
+
+#### SCOPE_EXIT 
+```cpp
+#define SCOPE_EXIT_CONCAT(n, ...) \
+const auto scope_exit##n = ext::make_scope_guard([&] { __VA_ARGS__; })
+#define SCOPE_EXIT_FWD(n, ...) SCOPE_EXIT_CONCAT(n, __VA_ARGS__)
+#define SCOPE_EXIT(...) SCOPE_EXIT_FWD(__LINE__, __VA_ARGS__)
+```
