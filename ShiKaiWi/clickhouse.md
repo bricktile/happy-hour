@@ -167,12 +167,16 @@ procedures:
         - Execute the task(node) by calling `processor.work()` and prepare it(why prepare?).
         - Keeping finding and executiong until all the tasks are finished or executiong is yeilt.
 
+## Misc
+### hashmap benchmark
+There are many benchmarks for different hashmap in the directory `src/interpreter/examples`.
+
 ## Questions
 - global_context 中设定了一个指针用于指向自己，有什么用处？
 - 动态绑定的逻辑确实是符合逻辑的，但是在这种模式下，是不是 OOP 使用起来会有比较多的误区？(可以参考 Server 和 Application 的关系)。
 
-### CPP language
-#### 动态绑定
+## CPP language
+### 动态绑定
 基类里面调用一个 virtual method，如果 this 指针实际上是一个派生类的话，会动态绑定到派生类的方法上，可以参考下面的例子：
 ```cpp
 #include <iostream>
@@ -201,7 +205,7 @@ int main() {
   return 1;
 }
 ```
-#### try catch
+### try catch
 此外还看到这样的 try catch block，用于 catch 所有的异常:
 ```cpp
 try {
@@ -211,10 +215,10 @@ try {
 }
 ```
 
-#### 继承模版类
+### 继承模版类
 一个模版类如果实例化之后，那么就是一个实例类，那么也就可以用来继承。
 
-#### SCOPE_EXIT 
+### SCOPE_EXIT 
 ```cpp
 #define SCOPE_EXIT_CONCAT(n, ...) \
 const auto scope_exit##n = ext::make_scope_guard([&] { __VA_ARGS__; })
@@ -229,5 +233,5 @@ Notes:
 - `__VA_ARGS__` are all the parameters of the macro.
 
 
-#### googletest
+### googletest
 Reference: https://google.github.io/googletest/primer.html
