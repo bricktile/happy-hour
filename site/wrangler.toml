@@ -5,4 +5,4 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "happy-hour"
-database_id = "placeholder-create-with-wrangler"
+database_id = "95854693-2fdd-42f7-a037-d9fb95b5eee1"
