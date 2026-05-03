@@ -1,0 +1,42 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  count?: number;
+}
+
+const { name, slug, count } = Astro.props;
+---
+
+<a href={`/tags/${slug}/`} class="tag-badge">
+  {name}
+  {count !== undefined && <span class="tag-count">{count}</span>}
+</a>
+
+<style>
+  .tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-decoration: none;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .tag-badge:hover {
+    border-color: var(--accent-dim);
+    text-decoration: none;
+  }
+
+  .tag-count {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+  }
+</style>

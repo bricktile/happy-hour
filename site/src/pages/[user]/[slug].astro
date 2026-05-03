@@ -1,21 +1,26 @@
 ---
 import NoteLayout from '../../layouts/NoteLayout.astro';
-import { loadAllNotes } from '../../lib/notes';
-import { marked } from 'marked';
+import Recommendations from '../../components/Recommendations.astro';
+import { getDB, getArticleWithTags, getRecommendedArticles } from '../../lib/db';
 
-export async function getStaticPaths() {
-  const notes = loadAllNotes();
+const { user: username, slug } = Astro.params;
+const db = getDB(Astro.locals);
 
-  return notes.map(note => ({
-    params: { user: note.author, slug: note.slug },
-    props: { note, allUserNotes: notes.filter(n => n.author === note.author) },
-  }));
+const article = await getArticleWithTags(db, username!, slug!);
+if (!article) {
+  return new Response('Article not found', { status: 404 });
 }
 
-const { note } = Astro.props;
-const html = marked(note.body);
+const tagIds = article.tags.map(t => t.id);
+const recommended = tagIds.length > 0
+  ? await getRecommendedArticles(db, article.id, tagIds, 5)
+  : [];
 ---
 
-<NoteLayout title={note.title} author={note.author} date={note.date}>
-  <Fragment set:html={html} />
+<NoteLayout title={article.title} author={article.author_username} date={article.published_at} tags={article.tags}>
+  <Fragment set:html={article.body_html} />
+
+  {recommended.length > 0 && (
+    <Recommendations articles={recommended} />
+  )}
 </NoteLayout>

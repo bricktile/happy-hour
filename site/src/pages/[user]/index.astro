@@ -2,31 +2,21 @@
 import Base from '../../layouts/Base.astro';
 import StreakChart from '../../components/StreakChart.astro';
 import NoteCard from '../../components/NoteCard.astro';
-import { loadAllNotes, computeUserStats } from '../../lib/notes';
+import { getDB, getUserByUsername, getArticlesByUser, getUserStats } from '../../lib/db';
 
-export async function getStaticPaths() {
-  const notes = loadAllNotes();
-  const users = [...new Set(notes.map(n => n.author))];
+const { user: username } = Astro.params;
+const db = getDB(Astro.locals);
 
-  return users.map(user => {
-    const stats = computeUserStats(user, notes);
-    const userNotes = notes
-      .filter(n => n.author === user)
-      .sort((a, b) => {
-        if (a.date && b.date) return b.date.localeCompare(a.date);
-        if (a.date && !b.date) return -1;
-        if (!a.date && b.date) return 1;
-        return a.filename.localeCompare(b.filename);
-      });
+const [dbUser, stats] = await Promise.all([
+  getUserByUsername(db, username!),
+  getUserStats(db, username!),
+]);
 
-    return {
-      params: { user },
-      props: { stats, userNotes },
-    };
-  });
+if (!dbUser || !stats) {
+  return new Response('User not found', { status: 404 });
 }
 
-const { stats, userNotes } = Astro.props;
+const articles = await getArticlesByUser(db, dbUser.id);
 
 function formatDisplayDate(d: string): string {
   if (!d || d.length !== 8) return '-';
@@ -59,21 +49,22 @@ function formatDisplayDate(d: string): string {
       </div>
       <div class="stat-card">
         <span class="stat-value">{stats.totalNotes}</span>
-        <span class="stat-label">Notes</span>
+        <span class="stat-label">Articles</span>
       </div>
     </div>
 
     <StreakChart checkInDates={stats.checkInDates} username={stats.username} />
 
     <section class="notes-section">
-      <h2>Notes</h2>
+      <h2>Articles</h2>
       <div class="notes-grid">
-        {userNotes.map(note => (
+        {articles.map(article => (
           <NoteCard
-            title={note.title}
-            author={note.author}
-            slug={note.slug}
-            date={note.date}
+            title={article.title}
+            author={article.author_username}
+            slug={article.slug}
+            date={article.published_at}
+            tags={article.tags}
           />
         ))}
       </div>

@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import MarkdownEditor from '../../components/MarkdownEditor.astro';
+import { getDB, getArticleById, getTagsForArticle } from '../../lib/db';
+
+if (!Astro.locals.user) {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: '/api/auth/github' },
+  });
+}
+
+const { id } = Astro.params;
+const db = getDB(Astro.locals);
+const article = await getArticleById(db, parseInt(id!));
+
+if (!article || article.user_id !== Astro.locals.user.id) {
+  return new Response('Not found', { status: 404 });
+}
+
+const tags = await getTagsForArticle(db, article.id);
+---
+
+<Base title={`Edit: ${article.title} - Happy Hour`}>
+  <meta name="current-user" content={Astro.locals.user.username} />
+  <section class="editor-page">
+    <h1>Edit Article</h1>
+    <MarkdownEditor
+      initialTitle={article.title}
+      initialBody={article.body_markdown}
+      initialTags={tags.map(t => t.name)}
+      articleId={article.id}
+    />
+  </section>
+</Base>
+
+<style>
+  .editor-page {
+    padding: 2rem 0 3rem;
+  }
+
+  .editor-page h1 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+</style>

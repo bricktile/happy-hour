@@ -1,4 +1,5 @@
 ---
+const user = Astro.locals.user;
 ---
 
 <header>
@@ -8,8 +9,21 @@
     </a>
     <nav>
       <a href="/">Home</a>
+      <a href="/tags">Tags</a>
       <a href="/about">About</a>
-      <a href="https://github.com/bricktile/happy-hour" target="_blank" rel="noopener">GitHub</a>
+      {user ? (
+        <a href="/editor" class="nav-action">+ New</a>
+        <div class="user-menu">
+          <img src={user.avatar_url} alt={user.username} class="avatar" width="24" height="24" />
+          <span class="username">{user.username}</span>
+          <div class="dropdown">
+            <a href={`/${user.username}/`}>My Articles</a>
+            <a href="/api/auth/logout">Sign Out</a>
+          </div>
+        </div>
+      ) : (
+        <a href="/api/auth/github" class="nav-action login-btn">Sign in with GitHub</a>
+      )}
     </nav>
   </div>
 </header>
@@ -45,7 +59,8 @@
 
   nav {
     display: flex;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 1.25rem;
   }
 
   nav a {
@@ -58,5 +73,64 @@
   nav a:hover {
     color: var(--text);
     text-decoration: none;
+  }
+
+  .nav-action {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  .nav-action:hover {
+    border-color: var(--accent-dim);
+  }
+
+  .login-btn {
+    color: var(--accent);
+    border-color: var(--accent-dim);
+  }
+
+  .user-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .avatar {
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  .username {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    min-width: 140px;
+    z-index: 100;
+  }
+
+  .dropdown a {
+    display: block;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .user-menu:hover .dropdown {
+    display: block;
   }
 </style>

@@ -1,0 +1,52 @@
+---
+import NoteCard from './NoteCard.astro';
+
+interface Props {
+  articles: {
+    id: number;
+    title: string;
+    slug: string;
+    published_at: string;
+    author_username: string;
+    tags: { name: string; slug: string }[];
+  }[];
+}
+
+const { articles } = Astro.props;
+---
+
+<section class="recommendations">
+  <h2>Related Articles</h2>
+  <div class="rec-grid">
+    {articles.map(article => (
+      <NoteCard
+        title={article.title}
+        author={article.author_username}
+        slug={article.slug}
+        date={article.published_at}
+        tags={article.tags}
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  .recommendations {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .recommendations h2 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+</style>

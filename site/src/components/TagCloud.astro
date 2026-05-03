@@ -1,0 +1,25 @@
+---
+import TagBadge from './TagBadge.astro';
+
+interface Props {
+  tags: { name: string; slug: string; count: number }[];
+  limit?: number;
+}
+
+const { tags, limit } = Astro.props;
+const displayTags = limit ? tags.slice(0, limit) : tags;
+---
+
+<div class="tag-cloud">
+  {displayTags.map(tag => (
+    <TagBadge name={tag.name} slug={tag.slug} count={tag.count} />
+  ))}
+</div>
+
+<style>
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>

@@ -1,17 +1,21 @@
 ---
 import Base from './Base.astro';
+import TagBadge from '../components/TagBadge.astro';
 
 interface Props {
   title: string;
   author: string;
   date: string;
+  tags?: { name: string; slug: string }[];
 }
 
-const { title, author, date } = Astro.props;
+const { title, author, date, tags = [] } = Astro.props;
 
 function formatDisplayDate(d: string): string {
-  if (!d || d.length !== 8) return d;
-  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+  if (!d) return '';
+  const cleaned = d.replace(/-/g, '');
+  if (cleaned.length !== 8) return d;
+  return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
 }
 ---
 
@@ -31,6 +35,11 @@ function formatDisplayDate(d: string): string {
         <a href={`/${author}/`} class="author">@{author}</a>
         {date && <time>{formatDisplayDate(date)}</time>}
       </div>
+      {tags.length > 0 && (
+        <div class="note-tags">
+          {tags.map(tag => <TagBadge name={tag.name} slug={tag.slug} />)}
+        </div>
+      )}
     </header>
 
     <div class="note-body">
@@ -73,6 +82,13 @@ function formatDisplayDate(d: string): string {
 
   .note-meta .author {
     color: var(--accent);
+  }
+
+  .note-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
   }
 
   .note-body {

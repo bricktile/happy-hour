@@ -1,17 +1,21 @@
 ---
+import TagBadge from './TagBadge.astro';
+
 interface Props {
   title: string;
   author: string;
   slug: string;
   date: string;
-  excerpt?: string;
+  tags?: { name: string; slug: string }[];
 }
 
-const { title, author, slug, date } = Astro.props;
+const { title, author, slug, date, tags = [] } = Astro.props;
 
 function formatDisplayDate(d: string): string {
-  if (!d || d.length !== 8) return '';
-  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+  if (!d) return '';
+  const cleaned = d.replace(/-/g, '');
+  if (cleaned.length !== 8) return d;
+  return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
 }
 ---
 
@@ -21,6 +25,13 @@ function formatDisplayDate(d: string): string {
     {date && <time class="card-date">{formatDisplayDate(date)}</time>}
   </div>
   <h3 class="card-title">{title}</h3>
+  {tags.length > 0 && (
+    <div class="card-tags">
+      {tags.slice(0, 3).map(tag => (
+        <TagBadge name={tag.name} slug={tag.slug} />
+      ))}
+    </div>
+  )}
 </a>
 
 <style>
@@ -64,7 +75,13 @@ function formatDisplayDate(d: string): string {
     font-size: 1rem;
     font-family: var(--font-mono);
     font-weight: 600;
-    margin: 0;
+    margin: 0 0 0.5rem;
     line-height: 1.4;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 </style>

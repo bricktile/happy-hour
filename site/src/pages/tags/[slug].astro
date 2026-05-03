@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import { getDB, getArticlesByTag, getAllTags } from '../../lib/db';
+
+const { slug } = Astro.params;
+const db = getDB(Astro.locals);
+
+const allTags = await getAllTags(db);
+const currentTag = allTags.find(t => t.slug === slug);
+
+if (!currentTag) {
+  return new Response('Tag not found', { status: 404 });
+}
+
+const articles = await getArticlesByTag(db, slug!);
+---
+
+<Base title={`#${currentTag.name} - Happy Hour`}>
+  <section class="tag-page">
+    <nav class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/tags">Tags</a>
+      <span class="sep">/</span>
+      <span>{currentTag.name}</span>
+    </nav>
+
+    <h1>
+      <span class="tag-symbol">#</span>{currentTag.name}
+    </h1>
+    <p class="subtitle">{articles.length} article{articles.length !== 1 ? 's' : ''}</p>
+
+    <div class="notes-grid">
+      {articles.map(article => (
+        <NoteCard
+          title={article.title}
+          author={article.author_username}
+          slug={article.slug}
+          date={article.published_at}
+          tags={article.tags}
+        />
+      ))}
+    </div>
+
+    {articles.length === 0 && (
+      <p class="empty">No articles with this tag yet.</p>
+    )}
+  </section>
+</Base>
+
+<style>
+  .tag-page {
+    padding: 2rem 0 3rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .breadcrumb .sep {
+    margin: 0 0.5rem;
+    color: var(--border);
+  }
+
+  .tag-page h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .tag-symbol {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 2rem;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+</style>

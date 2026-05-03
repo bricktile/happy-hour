@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
+import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
-  output: 'static',
-  outDir: './dist',
+  output: 'server',
+  adapter: cloudflare(),
 });

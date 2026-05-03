@@ -7,20 +7,20 @@ import Base from '../layouts/Base.astro';
     <h1>About Happy Hour</h1>
 
     <p>
-      <strong>Happy Hour</strong> is a learning accountability project for programmers.
-      The idea is simple: commit your daily learning notes to git, and the website
-      tracks your streak automatically.
+      <strong>Happy Hour</strong> is a learning platform for programmers.
+      Write articles, tag them with topics you care about, and discover
+      what others are learning. The platform recommends related articles
+      based on tag similarity.
     </p>
 
     <h2>How it works</h2>
 
     <ol>
-      <li><strong>Fork</strong> the repo and create your directory</li>
-      <li>Run <code>sh init.sh yourname</code> to set up your workspace</li>
-      <li>Each day, run <code>./newdaily topic</code> to create a new note</li>
-      <li>Write your notes in the generated markdown file</li>
-      <li>Run <code>./push</code> to commit and push</li>
-      <li>Your check-in is recorded and your streak updates on the next deploy</li>
+      <li><strong>Sign in</strong> with your GitHub account</li>
+      <li><strong>Write</strong> an article using the built-in markdown editor</li>
+      <li><strong>Tag</strong> your article with relevant topics</li>
+      <li><strong>Discover</strong> related articles from other learners</li>
+      <li><strong>Build</strong> your learning streak by publishing consistently</li>
     </ol>
 
     <h2>Philosophy</h2>
@@ -31,25 +31,25 @@ import Base from '../layouts/Base.astro';
 
     <p>
       It doesn't matter what you learn. It matters that you learn consistently.
-      One hour a day, every day. Write down what you learned, what confused you,
-      and what questions you have. Over time, you'll build a personal knowledge base
-      and a habit that compounds.
+      Tag your articles so others can find and learn from your notes.
+      Over time, you'll build a personal knowledge base and a habit that compounds.
     </p>
 
     <h2>Tech Stack</h2>
 
     <ul>
-      <li><strong>Content</strong>: Markdown files in git</li>
-      <li><strong>Site</strong>: Astro static site generator</li>
+      <li><strong>Frontend</strong>: Astro SSR</li>
+      <li><strong>Database</strong>: Cloudflare D1 (SQLite)</li>
       <li><strong>Hosting</strong>: Cloudflare Pages</li>
-      <li><strong>Deployment</strong>: Automatic on push to master</li>
+      <li><strong>Auth</strong>: GitHub OAuth</li>
+      <li><strong>Content</strong>: Markdown with tags</li>
     </ul>
 
     <h2>Join</h2>
 
     <p>
-      Want to join? Open an issue or submit a PR on
-      <a href="https://github.com/bricktile/happy-hour" target="_blank" rel="noopener">GitHub</a>.
+      Sign in with GitHub and start writing. Or contribute on
+      <a href="https://github.com/danliustc/happy-hour" target="_blank" rel="noopener">GitHub</a>.
     </p>
   </section>
 </Base>

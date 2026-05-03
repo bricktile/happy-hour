@@ -2,18 +2,19 @@
 import Base from '../layouts/Base.astro';
 import Leaderboard from '../components/Leaderboard.astro';
 import NoteCard from '../components/NoteCard.astro';
-import { loadAllNotes, getAllUserStats } from '../lib/notes';
+import TagCloud from '../components/TagCloud.astro';
+import { getDB, getRecentArticles, getAllUserStats, getPopularTags } from '../lib/db';
 
-const notes = loadAllNotes();
-const allStats = getAllUserStats(notes);
-const totalNotes = notes.length;
+const db = getDB(Astro.locals);
+const [recentArticles, allStats, popularTags] = await Promise.all([
+  getRecentArticles(db, 12),
+  getAllUserStats(db),
+  getPopularTags(db, 20),
+]);
+
+const totalNotes = allStats.reduce((s, u) => s + u.totalNotes, 0);
 const totalUsers = allStats.length;
-const totalDays = allStats.reduce((sum, s) => sum + s.totalCheckInDays, 0);
-
-const recentNotes = [...notes]
-  .filter(n => n.date)
-  .sort((a, b) => b.date.localeCompare(a.date))
-  .slice(0, 12);
+const totalDays = allStats.reduce((s, u) => s + u.totalCheckInDays, 0);
 ---
 
 <Base title="Happy Hour - Learn anything at anytime">
@@ -21,7 +22,7 @@ const recentNotes = [...notes]
     <h1>Happy Hour</h1>
     <p class="tagline">Learn anything at anytime in one hour.</p>
     <p class="subtitle">
-      Git commit = check-in. Push your notes, build your streak.
+      Write, tag, and discover. A learning platform for programmers.
     </p>
   </section>
 
@@ -32,7 +33,7 @@ const recentNotes = [...notes]
     </div>
     <div class="stat">
       <span class="stat-value">{totalNotes}</span>
-      <span class="stat-label">Notes</span>
+      <span class="stat-label">Articles</span>
     </div>
     <div class="stat">
       <span class="stat-value">{totalDays}</span>
@@ -40,17 +41,25 @@ const recentNotes = [...notes]
     </div>
   </section>
 
+  {popularTags.length > 0 && (
+    <section class="tags-section">
+      <h2>Popular Tags</h2>
+      <TagCloud tags={popularTags} />
+    </section>
+  )}
+
   <Leaderboard stats={allStats} />
 
   <section class="recent">
-    <h2>Recent Notes</h2>
+    <h2>Recent Articles</h2>
     <div class="notes-grid">
-      {recentNotes.map(note => (
+      {recentArticles.map(article => (
         <NoteCard
-          title={note.title}
-          author={note.author}
-          slug={note.slug}
-          date={note.date}
+          title={article.title}
+          author={article.author_username}
+          slug={article.slug}
+          date={article.published_at}
+          tags={article.tags}
         />
       ))}
     </div>
@@ -110,6 +119,17 @@ const recentNotes = [...notes]
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  .tags-section {
+    margin: 2rem 0;
+  }
+
+  .tags-section h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-top: 0;
+    margin-bottom: 1rem;
   }
 
   .recent {

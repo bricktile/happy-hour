@@ -1,0 +1,369 @@
+---
+interface Props {
+  initialTitle?: string;
+  initialBody?: string;
+  initialTags?: string[];
+  articleId?: number;
+}
+
+const { initialTitle = '', initialBody = '', initialTags = [], articleId } = Astro.props;
+---
+
+<div class="editor-wrap">
+  <div class="editor-header">
+    <input type="text" id="article-title" placeholder="Article title..." value={initialTitle} class="title-input" />
+  </div>
+
+  <div class="editor-tabs">
+    <button class="tab active" data-tab="write">Write</button>
+    <button class="tab" data-tab="preview">Preview</button>
+  </div>
+
+  <div id="write-pane" class="editor-pane">
+    <textarea id="article-body" placeholder="Write your article in markdown...">{initialBody}</textarea>
+  </div>
+
+  <div id="preview-pane" class="editor-pane hidden">
+    <div id="preview-content" class="preview-body"></div>
+  </div>
+
+  <div class="editor-footer">
+    <div class="tag-input-wrap">
+      <input type="text" id="tag-input" placeholder="Add tags (comma separated)" class="tag-field" />
+      <div id="tag-suggestions" class="tag-suggestions hidden"></div>
+    </div>
+    <div id="tag-list" class="tag-list">
+      {initialTags.map(tag => (
+        <span class="tag-pill" data-tag={tag}>
+          {tag}
+          <button class="tag-remove" type="button">&times;</button>
+        </span>
+      ))}
+    </div>
+    <button id="publish-btn" class="publish-btn" data-article-id={articleId || ''}>
+      {articleId ? 'Update' : 'Publish'}
+    </button>
+  </div>
+</div>
+
+<script>
+  import { marked } from 'marked';
+
+  const tabs = document.querySelectorAll('.tab');
+  const writePane = document.getElementById('write-pane')!;
+  const previewPane = document.getElementById('preview-pane')!;
+  const previewContent = document.getElementById('preview-content')!;
+  const textarea = document.getElementById('article-body') as HTMLTextAreaElement;
+  const titleInput = document.getElementById('article-title') as HTMLInputElement;
+  const tagInput = document.getElementById('tag-input') as HTMLInputElement;
+  const tagSuggestions = document.getElementById('tag-suggestions')!;
+  const tagList = document.getElementById('tag-list')!;
+  const publishBtn = document.getElementById('publish-btn')!;
+
+  // Tab switching
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (tab.getAttribute('data-tab') === 'preview') {
+        writePane.classList.add('hidden');
+        previewPane.classList.remove('hidden');
+        previewContent.innerHTML = marked.parse(textarea.value) as string;
+      } else {
+        writePane.classList.remove('hidden');
+        previewPane.classList.add('hidden');
+      }
+    });
+  });
+
+  // Tag management
+  function getTags(): string[] {
+    return Array.from(tagList.querySelectorAll('.tag-pill')).map(
+      el => (el as HTMLElement).dataset.tag!
+    );
+  }
+
+  function addTag(name: string) {
+    const trimmed = name.trim().toLowerCase();
+    if (!trimmed || getTags().includes(trimmed)) return;
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.dataset.tag = trimmed;
+    pill.innerHTML = `${trimmed}<button class="tag-remove" type="button">&times;</button>`;
+    pill.querySelector('.tag-remove')!.addEventListener('click', () => pill.remove());
+    tagList.appendChild(pill);
+  }
+
+  // Remove existing tags
+  tagList.querySelectorAll('.tag-remove').forEach(btn => {
+    btn.addEventListener('click', () => (btn as HTMLElement).closest('.tag-pill')?.remove());
+  });
+
+  // Tag input
+  tagInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = tagInput.value.replace(/,/g, '').trim();
+      if (val) addTag(val);
+      tagInput.value = '';
+      tagSuggestions.classList.add('hidden');
+    }
+  });
+
+  // Tag autocomplete
+  let debounceTimer: number;
+  tagInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = tagInput.value.trim();
+    if (q.length < 1) {
+      tagSuggestions.classList.add('hidden');
+      return;
+    }
+    debounceTimer = window.setTimeout(async () => {
+      const res = await fetch(`/api/tags/suggest?q=${encodeURIComponent(q)}`);
+      const tags = await res.json() as { name: string }[];
+      if (tags.length === 0) {
+        tagSuggestions.classList.add('hidden');
+        return;
+      }
+      tagSuggestions.innerHTML = tags.map(t =>
+        `<button class="suggestion" type="button">${t.name}</button>`
+      ).join('');
+      tagSuggestions.classList.remove('hidden');
+      tagSuggestions.querySelectorAll('.suggestion').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addTag(btn.textContent!);
+          tagInput.value = '';
+          tagSuggestions.classList.add('hidden');
+        });
+      });
+    }, 200);
+  });
+
+  // Publish
+  publishBtn.addEventListener('click', async () => {
+    const title = titleInput.value.trim();
+    const body = textarea.value.trim();
+    const tags = getTags();
+    const articleId = (publishBtn as HTMLElement).dataset.articleId;
+
+    if (!title || !body) {
+      alert('Title and body are required');
+      return;
+    }
+
+    publishBtn.setAttribute('disabled', 'true');
+    publishBtn.textContent = 'Publishing...';
+
+    try {
+      const url = articleId ? `/api/articles/${articleId}` : '/api/articles';
+      const method = articleId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body_markdown: body, tags }),
+      });
+      const data = await res.json() as { id: number; slug: string; error?: string };
+      if (!res.ok) {
+        alert(data.error || 'Failed to publish');
+        return;
+      }
+      // Get current user from page context
+      const userMeta = document.querySelector('meta[name="current-user"]');
+      const username = userMeta?.getAttribute('content') || '';
+      window.location.href = `/${username}/${data.slug}/`;
+    } catch (err) {
+      alert('Failed to publish');
+    } finally {
+      publishBtn.removeAttribute('disabled');
+      publishBtn.textContent = articleId ? 'Update' : 'Publish';
+    }
+  });
+</script>
+
+<style>
+  .editor-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .title-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .title-input:focus {
+    border-color: var(--accent-dim);
+  }
+
+  .editor-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .editor-pane textarea {
+    width: 100%;
+    min-height: 400px;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+  }
+
+  .editor-pane textarea:focus {
+    border-color: var(--accent-dim);
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .preview-body {
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 400px;
+    line-height: 1.8;
+  }
+
+  .editor-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tag-input-wrap {
+    position: relative;
+  }
+
+  .tag-field {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  .tag-field:focus {
+    border-color: var(--accent-dim);
+  }
+
+  .tag-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 0.25rem;
+    z-index: 10;
+    overflow: hidden;
+  }
+
+  .suggestion {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .suggestion:hover {
+    background: var(--bg);
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .tag-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .publish-btn {
+    align-self: flex-end;
+    padding: 0.6rem 1.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .publish-btn:hover {
+    opacity: 0.9;
+  }
+
+  .publish-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

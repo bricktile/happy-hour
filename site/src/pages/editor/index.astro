@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import MarkdownEditor from '../../components/MarkdownEditor.astro';
+
+if (!Astro.locals.user) {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: '/api/auth/github' },
+  });
+}
+---
+
+<Base title="New Article - Happy Hour">
+  <meta name="current-user" content={Astro.locals.user.username} />
+  <section class="editor-page">
+    <h1>New Article</h1>
+    <MarkdownEditor />
+  </section>
+</Base>
+
+<style>
+  .editor-page {
+    padding: 2rem 0 3rem;
+  }
+
+  .editor-page h1 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+</style>
