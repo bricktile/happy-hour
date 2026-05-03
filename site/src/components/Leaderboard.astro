@@ -1,0 +1,113 @@
+---
+import type { UserStats } from '../lib/types';
+
+interface Props {
+  stats: UserStats[];
+}
+
+const { stats } = Astro.props;
+const sorted = [...stats].sort((a, b) => b.currentStreak - a.currentStreak || b.totalCheckInDays - a.totalCheckInDays);
+
+function formatDisplayDate(d: string): string {
+  if (!d || d.length !== 8) return '-';
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+}
+---
+
+<div class="leaderboard">
+  <h2>Leaderboard</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Current Streak</th>
+          <th>Longest Streak</th>
+          <th>Total Days</th>
+          <th>Notes</th>
+          <th>Last Active</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map((u, i) => (
+          <tr>
+            <td class="rank">{i + 1}</td>
+            <td><a href={`/${u.username}/`} class="username">{u.username}</a></td>
+            <td class="streak">
+              {u.currentStreak > 0 && <span class="fire">🔥</span>}
+              {u.currentStreak}
+            </td>
+            <td>{u.longestStreak}</td>
+            <td>{u.totalCheckInDays}</td>
+            <td>{u.totalNotes}</td>
+            <td class="date">{formatDisplayDate(u.lastCheckIn)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .leaderboard {
+    margin: 2rem 0;
+  }
+
+  .leaderboard h2 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  table {
+    width: 100%;
+    margin: 0;
+  }
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  td {
+    font-size: 0.9rem;
+  }
+
+  .rank {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    width: 2.5rem;
+  }
+
+  .username {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--link);
+  }
+
+  .streak {
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .fire {
+    margin-right: 0.25rem;
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+</style>

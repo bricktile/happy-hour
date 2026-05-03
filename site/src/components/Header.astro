@@ -1,0 +1,62 @@
+---
+---
+
+<header>
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <span class="prompt">&gt;_</span> Happy Hour
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="https://github.com/bricktile/happy-hour" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3.5rem;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .logo:hover {
+    text-decoration: none;
+  }
+
+  .prompt {
+    color: var(--accent);
+  }
+
+  nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  nav a {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  nav a:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
+</style>

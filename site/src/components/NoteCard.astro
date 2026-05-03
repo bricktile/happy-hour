@@ -1,0 +1,70 @@
+---
+interface Props {
+  title: string;
+  author: string;
+  slug: string;
+  date: string;
+  excerpt?: string;
+}
+
+const { title, author, slug, date } = Astro.props;
+
+function formatDisplayDate(d: string): string {
+  if (!d || d.length !== 8) return '';
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+}
+---
+
+<a href={`/${author}/${slug}/`} class="card">
+  <div class="card-header">
+    <span class="card-author">@{author}</span>
+    {date && <time class="card-date">{formatDisplayDate(date)}</time>}
+  </div>
+  <h3 class="card-title">{title}</h3>
+</a>
+
+<style>
+  .card {
+    display: block;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    transition: border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .card:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-author {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .card-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+  }
+</style>

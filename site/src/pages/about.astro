@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="About - Happy Hour">
+  <section class="about">
+    <h1>About Happy Hour</h1>
+
+    <p>
+      <strong>Happy Hour</strong> is a learning accountability project for programmers.
+      The idea is simple: commit your daily learning notes to git, and the website
+      tracks your streak automatically.
+    </p>
+
+    <h2>How it works</h2>
+
+    <ol>
+      <li><strong>Fork</strong> the repo and create your directory</li>
+      <li>Run <code>sh init.sh yourname</code> to set up your workspace</li>
+      <li>Each day, run <code>./newdaily topic</code> to create a new note</li>
+      <li>Write your notes in the generated markdown file</li>
+      <li>Run <code>./push</code> to commit and push</li>
+      <li>Your check-in is recorded and your streak updates on the next deploy</li>
+    </ol>
+
+    <h2>Philosophy</h2>
+
+    <blockquote>
+      Learn anything at anytime in one hour.
+    </blockquote>
+
+    <p>
+      It doesn't matter what you learn. It matters that you learn consistently.
+      One hour a day, every day. Write down what you learned, what confused you,
+      and what questions you have. Over time, you'll build a personal knowledge base
+      and a habit that compounds.
+    </p>
+
+    <h2>Tech Stack</h2>
+
+    <ul>
+      <li><strong>Content</strong>: Markdown files in git</li>
+      <li><strong>Site</strong>: Astro static site generator</li>
+      <li><strong>Hosting</strong>: Cloudflare Pages</li>
+      <li><strong>Deployment</strong>: Automatic on push to master</li>
+    </ul>
+
+    <h2>Join</h2>
+
+    <p>
+      Want to join? Open an issue or submit a PR on
+      <a href="https://github.com/bricktile/happy-hour" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .about {
+    max-width: 640px;
+    margin: 2rem auto;
+    padding-bottom: 3rem;
+  }
+
+  .about h1 {
+    margin-top: 0;
+  }
+
+  .about h2 {
+    margin-top: 2rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about ol, .about ul {
+    padding-left: 1.5rem;
+  }
+
+  .about li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+</style>

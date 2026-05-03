@@ -1,0 +1,21 @@
+---
+import NoteLayout from '../../layouts/NoteLayout.astro';
+import { loadAllNotes } from '../../lib/notes';
+import { marked } from 'marked';
+
+export async function getStaticPaths() {
+  const notes = loadAllNotes();
+
+  return notes.map(note => ({
+    params: { user: note.author, slug: note.slug },
+    props: { note, allUserNotes: notes.filter(n => n.author === note.author) },
+  }));
+}
+
+const { note } = Astro.props;
+const html = marked(note.body);
+---
+
+<NoteLayout title={note.title} author={note.author} date={note.date}>
+  <Fragment set:html={html} />
+</NoteLayout>

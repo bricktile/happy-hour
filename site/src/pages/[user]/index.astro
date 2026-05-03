@@ -1,0 +1,160 @@
+---
+import Base from '../../layouts/Base.astro';
+import StreakChart from '../../components/StreakChart.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import { loadAllNotes, computeUserStats } from '../../lib/notes';
+
+export async function getStaticPaths() {
+  const notes = loadAllNotes();
+  const users = [...new Set(notes.map(n => n.author))];
+
+  return users.map(user => {
+    const stats = computeUserStats(user, notes);
+    const userNotes = notes
+      .filter(n => n.author === user)
+      .sort((a, b) => {
+        if (a.date && b.date) return b.date.localeCompare(a.date);
+        if (a.date && !b.date) return -1;
+        if (!a.date && b.date) return 1;
+        return a.filename.localeCompare(b.filename);
+      });
+
+    return {
+      params: { user },
+      props: { stats, userNotes },
+    };
+  });
+}
+
+const { stats, userNotes } = Astro.props;
+
+function formatDisplayDate(d: string): string {
+  if (!d || d.length !== 8) return '-';
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+}
+---
+
+<Base title={`${stats.username} - Happy Hour`}>
+  <section class="profile">
+    <div class="profile-header">
+      <h1>{stats.username}</h1>
+      <p class="profile-range">
+        {formatDisplayDate(stats.firstCheckIn)}
+        {stats.lastCheckIn && stats.firstCheckIn !== stats.lastCheckIn && ` — ${formatDisplayDate(stats.lastCheckIn)}`}
+      </p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">{stats.currentStreak}</span>
+        <span class="stat-label">Current Streak</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{stats.longestStreak}</span>
+        <span class="stat-label">Longest Streak</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{stats.totalCheckInDays}</span>
+        <span class="stat-label">Total Days</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{stats.totalNotes}</span>
+        <span class="stat-label">Notes</span>
+      </div>
+    </div>
+
+    <StreakChart checkInDates={stats.checkInDates} username={stats.username} />
+
+    <section class="notes-section">
+      <h2>Notes</h2>
+      <div class="notes-grid">
+        {userNotes.map(note => (
+          <NoteCard
+            title={note.title}
+            author={note.author}
+            slug={note.slug}
+            date={note.date}
+          />
+        ))}
+      </div>
+    </section>
+  </section>
+</Base>
+
+<style>
+  .profile {
+    padding: 2rem 0 3rem;
+  }
+
+  .profile-header {
+    margin-bottom: 2rem;
+  }
+
+  .profile-header h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .profile-range {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+  }
+
+  .notes-section {
+    margin-top: 2rem;
+  }
+
+  .notes-section h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

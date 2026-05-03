@@ -1,0 +1,134 @@
+---
+interface Props {
+  checkInDates: string[];
+  username: string;
+}
+
+const { checkInDates, username } = Astro.props;
+
+const dateSet = new Set(checkInDates);
+
+function parseDate(d: string): Date {
+  const y = parseInt(d.slice(0, 4));
+  const m = parseInt(d.slice(4, 6)) - 1;
+  const day = parseInt(d.slice(6, 8));
+  return new Date(y, m, day);
+}
+
+function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}${m}${day}`;
+}
+
+const weeks: { date: string; active: boolean; today: boolean }[][] = [];
+
+if (checkInDates.length > 0) {
+  const sorted = [...checkInDates].sort();
+  const startDate = parseDate(sorted[0]);
+  const endDate = new Date();
+  endDate.setHours(0, 0, 0, 0);
+
+  const todayStr = formatDate(endDate);
+
+  const dayOfWeek = startDate.getDay();
+  const gridStart = new Date(startDate);
+  gridStart.setDate(gridStart.getDate() - dayOfWeek);
+
+  let current = new Date(gridStart);
+  let currentWeek: { date: string; active: boolean; today: boolean }[] = [];
+
+  while (current <= endDate) {
+    const dateStr = formatDate(current);
+    currentWeek.push({
+      date: dateStr,
+      active: dateSet.has(dateStr),
+      today: dateStr === todayStr,
+    });
+
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  if (currentWeek.length > 0) {
+    weeks.push(currentWeek);
+  }
+}
+
+const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+---
+
+<div class="streak-chart">
+  <h3>Activity</h3>
+  {weeks.length > 0 ? (
+    <div class="grid">
+      {weeks.map(week => (
+        <div class="week">
+          {week.map(day => (
+            <div
+              class:list={['cell', { active: day.active, today: day.today }]}
+              title={`${day.date.slice(0, 4)}-${day.date.slice(4, 6)}-${day.date.slice(6, 8)}${day.active ? ' ✓' : ''}`}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p class="empty">No activity data</p>
+  )}
+</div>
+
+<style>
+  .streak-chart {
+    margin: 1.5rem 0;
+  }
+
+  .streak-chart h3 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .grid {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .week {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .cell.active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .cell.today {
+    border-color: var(--text);
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+</style>

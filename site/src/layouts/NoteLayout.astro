@@ -1,0 +1,87 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  author: string;
+  date: string;
+}
+
+const { title, author, date } = Astro.props;
+
+function formatDisplayDate(d: string): string {
+  if (!d || d.length !== 8) return d;
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+}
+---
+
+<Base title={`${title} - Happy Hour`}>
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="sep">/</span>
+    <a href={`/${author}/`}>{author}</a>
+    <span class="sep">/</span>
+    <span>{title}</span>
+  </nav>
+
+  <article class="note">
+    <header class="note-header">
+      <h1>{title}</h1>
+      <div class="note-meta">
+        <a href={`/${author}/`} class="author">@{author}</a>
+        {date && <time>{formatDisplayDate(date)}</time>}
+      </div>
+    </header>
+
+    <div class="note-body">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .breadcrumb {
+    margin: 2rem 0 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .breadcrumb .sep {
+    margin: 0 0.5rem;
+    color: var(--border);
+  }
+
+  .note-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .note-header h1 {
+    margin-top: 0;
+  }
+
+  .note-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .note-meta .author {
+    color: var(--accent);
+  }
+
+  .note-body {
+    line-height: 1.8;
+  }
+
+  .note-body :global(h2) {
+    margin-top: 2rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+  }
+</style>
